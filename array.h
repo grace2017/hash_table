@@ -1,3 +1,7 @@
+#define BOOL int
+#define TRUE 1
+#define FALSE 0
+
 typedef char * string;
 
 typedef unsigned int unint;
@@ -5,8 +9,9 @@ typedef unsigned char unchar;
 
 typedef struct node
 {
-	char *key;
-	void *val;
+	string key;
+	string val;
+	string type;
 	struct node *p_next;
 	struct node *p_sub_next;
 }NODE, *P_NODE;
@@ -23,6 +28,7 @@ typedef struct table
 	int mask;
 	int all_elem_num;
 	int valid_elem_num;
+	int next_index; //类似mysql的自增字段
 	P_NODE p_position;
 	P_NODE p_top;
 	P_NODE p_bottom;
@@ -34,10 +40,10 @@ typedef P_TABLE Table;
 Table table_create();
 
 //插入元素
-Node table_insert(Table, char *, void *);
+Node table_insert(Table, string, string, string);
 
 //根据key查找元素
-Node table_lookup(Table, char *);
+Node table_lookup(Table, string);
 
 /*
 	遍历
@@ -57,7 +63,7 @@ int table_count(Table);
 void resize_table(Table);
 
 //创建node
-Node node_create(char *key, void *val);
+Node node_create(string, string, string);
 
 //下一个node
 Node node_next(Node);
@@ -70,3 +76,5 @@ void * node_val(Node);
 
 //是否为NULL
 char * node_is_null(Node);
+
+BOOL in_basic_string_array(string *, string, unint);

@@ -1,5 +1,6 @@
 #include <malloc.h>
 #include <stdlib.h>
+#include <string.h>
 #include "hash.c"
 #include "array.h"
 
@@ -11,7 +12,7 @@ Table table_create()
 
 	table->size = TABLE_DEFAULT_SIZE;
 	table->mask = table->size - 1;
-	table->all_elem_num = table->valid_elem_num = 0;
+	table->all_elem_num = table->valid_elem_num = table->next_index = 0;
 	table->p_top = table->p_bottom = table->p_position = NULL;
 	
 	table->nodes = (Node *)calloc(table->size, sizeof(Node));
@@ -41,11 +42,11 @@ void resize_table(Table table)
 	table->nodes = (Node *)calloc(table->size, sizeof(Node));
 
         while(NULL != old_node) {
-		table_insert(table, old_node->key, old_node->val);
+		table_insert(table, old_node->key, old_node->val, old_node->type);
 
                 Node sub_node = old_node->p_sub_next;
                 while(NULL != sub_node) {
-                       table_insert(table, sub_node->key, sub_node->val); 
+                       table_insert(table, sub_node->key, sub_node->val, sub_node->type); 
 
                         sub_node = sub_node->p_sub_next;
                 }
@@ -54,16 +55,35 @@ void resize_table(Table table)
         }
 }
 
-Node table_insert(Table table, char *key, void *val)
+Node table_insert(Table table, string key, string val, string type)
 {
+	string allow_type[2] = {"TYPE_RELATE", "TYPE_INDEX"};
+	if(FALSE == in_basic_string_array(allow_type, type, 2)) {
+		printf("不允许的type：%s\n", type);
+		
+		exit(-1);
+	}
+
 	if("true" == resize_table_if_needed(table)) {
 		resize_table(table);
 	}
 
-	Node new_node = node_create(key, val);
+	int index = 0;
 
-	unsigned index = time33(key, 8);
-	index = table->mask & index;
+	if("TYPE_RELATE" == type) {
+		if(0 == strlen(key)) {
+			index = table->next_index;
+		} else {
+			index = atoi(key);
+		}
+	}
+
+	if("TYPE_INDEX" == type) {
+		index = time33(key, 1);
+		index = table->mask & index;
+	}
+
+	Node new_node = node_create(key, val, type);
 	
 	Node tmp_node = table->nodes[index];
 	if(NULL == tmp_node) {
@@ -122,13 +142,34 @@ int table_count(Table table)
 	return table->all_elem_num;
 }
 
-Node node_create(char *key, void *val)
+Node node_create(string key, string val, string type)
 {
 	Node node = (Node)malloc(sizeof(NODE));
 
 	node->key = key;
 	node->val = val;
+	node->type = type;
+
 	node->p_next = node->p_sub_next = NULL;
 
 	return node;
+}
+
+BOOL in_basic_string_array(string *array, string val, unint elem_num)
+{
+	if(elem_num > 0) {
+		int key;
+
+		for(key=0; key<=elem_num; key++) {
+			if(key == elem_num) {
+				return FALSE;
+			} else {
+				if(0 == strcmp(val, array[key])) {
+                         	       return TRUE;
+                        	}
+			}
+		}
+	} else {
+		return FALSE;
+	}
 }
