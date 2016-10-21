@@ -1,10 +1,9 @@
 #include <malloc.h>
 #include <stdlib.h>
 #include "hash.c"
-#include "array_relate.h"
-#include "array_index.h"
+#include "array.h"
 
-#define TABLE_DEFAULT_SIZE 8
+#define TABLE_DEFAULT_SIZE 2;
 
 Table table_create()
 {
@@ -31,6 +30,7 @@ char * resize_table_if_needed(Table table)
 
 void resize_table(Table table)
 {
+printf("开始扩容：%d\n", table->elem_num);
 	int old_size = table->size;
 	Node *old_nodes = table->nodes;
 	Node old_node = table->p_top;
