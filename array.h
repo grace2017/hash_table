@@ -16,14 +16,13 @@ typedef P_NODE Node;
 /*
 	可优化：
 		增加一个结构体管理相同index生成的单链表。当前这样设计，添加相同index的元素需要寻找相同index的最后一个元素
-
-		增加一个属性记录存在在nodes中的地址个数。当前这样设计会造成内存的浪费，因为扩容内存根据elem_num与size的差值。
 */
 typedef struct table
 {
 	int size;
 	int mask;
-	int elem_num;
+	int all_elem_num;
+	int valid_elem_num;
 	P_NODE p_position;
 	P_NODE p_top;
 	P_NODE p_bottom;

@@ -3,7 +3,7 @@
 #include "hash.c"
 #include "array.h"
 
-#define TABLE_DEFAULT_SIZE 2;
+#define TABLE_DEFAULT_SIZE 8;
 
 Table table_create()
 {
@@ -11,7 +11,7 @@ Table table_create()
 
 	table->size = TABLE_DEFAULT_SIZE;
 	table->mask = table->size - 1;
-	table->elem_num = 0;
+	table->all_elem_num = table->valid_elem_num = 0;
 	table->p_top = table->p_bottom = table->p_position = NULL;
 	
 	table->nodes = (Node *)calloc(table->size, sizeof(Node));
@@ -21,7 +21,7 @@ Table table_create()
 
 char * resize_table_if_needed(Table table)
 {
-	if(0 == (table->size - table->elem_num)) {
+	if(0 == (table->size - table->valid_elem_num)) {
 		return "true";
 	} else {
 		return "false";
@@ -30,13 +30,12 @@ char * resize_table_if_needed(Table table)
 
 void resize_table(Table table)
 {
-printf("开始扩容：%d\n", table->elem_num);
 	int old_size = table->size;
 	Node *old_nodes = table->nodes;
 	Node old_node = table->p_top;
 
 	table->size = table->size * 2;
-	table->elem_num = 0;
+	table->all_elem_num = table->valid_elem_num = 0;
 	table->p_top = table->p_bottom = table->p_position = NULL;
 
 	table->nodes = (Node *)calloc(table->size, sizeof(Node));
@@ -63,25 +62,26 @@ Node table_insert(Table table, char *key, void *val)
 
 	Node new_node = node_create(key, val);
 
-	unsigned index = time33(key, 1);
+	unsigned index = time33(key, 8);
 	index = table->mask & index;
 	
 	Node tmp_node = table->nodes[index];
 	if(NULL == tmp_node) {
-		if(0 == table->elem_num) {		
+		if(0 == table->all_elem_num) {		
 			table->nodes[index] = new_node;
-			table->elem_num++;
 
 			table->p_top = table->p_bottom = table->p_position = new_node;	
 		} else {
 			table->nodes[index] = new_node;
-			table->elem_num++;
 
 			new_node->p_next = table->p_top;
 			new_node->p_sub_next = NULL;			
 
 			table->p_top = table->p_bottom = new_node;
 		}
+
+		table->all_elem_num++;
+		table->valid_elem_num++;
 	} else {
 		for(;;) {
 			if(NULL == tmp_node->p_sub_next) {
@@ -93,7 +93,7 @@ Node table_insert(Table table, char *key, void *val)
 			}
 		}
 
-		table->elem_num++;
+		table->all_elem_num++;
 	}
 	
 	return new_node;
@@ -119,7 +119,7 @@ void table_traverse(Table table)
 
 int table_count(Table table)
 {
-	return table->elem_num;
+	return table->all_elem_num;
 }
 
 Node node_create(char *key, void *val)
