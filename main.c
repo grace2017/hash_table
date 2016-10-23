@@ -29,7 +29,15 @@ void main()
 	table_insert(table, "", "ont hundred and six", "TYPE_RELATE");
 	table_insert(table, "", "ont hundred and six", "TYPE_RELATE");
 	table_insert(table, "", "ont hundred and six", "TYPE_RELATE");
+	table_insert(table, "", "ont hundred and six", "TYPE_RELATE");
+	table_insert(table, "", "ont hundred and six", "TYPE_RELATE");
+	table_insert(table, "", "ont hundred and six", "TYPE_RELATE");
+	table_insert(table, "", "ont hundred and six", "TYPE_RELATE");
 
 printf("size=%d, anum=%d, vnum=%d, next_index=%d\n", table->size, table->all_elem_num, table->valid_elem_num, table->next_index);
 	table_traverse(table);
+
+	printf("aaa=%s\n", table_lookup(table, "aaa", "TYPE_INDEX"));
+
+
 }

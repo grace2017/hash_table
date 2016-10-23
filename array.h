@@ -1,3 +1,7 @@
+/*
+	如果形参为任意类型的数据，用可变参数实现
+*/
+
 #define BOOL int
 #define TRUE 1
 #define FALSE 0
@@ -37,13 +41,23 @@ typedef struct table
 
 typedef P_TABLE Table;
 
+typedef struct value
+{
+	string type; //类型
+	void *val; //值
+}VALUE, *P_VALUE;
+
+typedef P_VALUE Value;
+
 Table table_create();
+void table_init(Table);
 
 //插入元素
 Node table_insert(Table, void *, string, string);
+Node table_insert_simple(Table, void *, string, ...);
 
 //根据key查找元素
-Node table_lookup(Table, string);
+string table_lookup(Table, string, string);
 
 /*
 	遍历
@@ -87,3 +101,5 @@ int get_int_length(unint);
 
 //整型转为字符串
 string int_to_string(int);
+
+int variable_parame_num();

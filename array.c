@@ -1,6 +1,7 @@
 #include <malloc.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 #include "hash.c"
 #include "array.h"
 
@@ -11,16 +12,23 @@ Table table_create()
 	Table table = (Table)malloc(sizeof(TABLE));
 
 	table->size = TABLE_DEFAULT_SIZE;
+
+	table_init(table);
+
+	return table;
+}
+
+void table_init(Table table)
+{
 	table->mask = table->size - 1;
 
 	table->all_elem_num = table->valid_elem_num = 0;
+	
 	table->next_index = 1;
 
 	table->p_top = table->p_bottom = table->p_position = NULL;
-	
-	table->nodes = (Node *)calloc(table->size, sizeof(Node));
 
-	return table;
+	table->nodes = (Node *)calloc(table->size, sizeof(Node));
 }
 
 BOOL resize_table_if_needed(Table table)
@@ -35,14 +43,11 @@ BOOL resize_table_if_needed(Table table)
 void resize_table(Table table)
 {
 	int old_size = table->size;
-	Node *old_nodes = table->nodes;
 	Node old_node = table->p_top;
 
 	table->size = table->size * 2;
-	table->all_elem_num = table->valid_elem_num = 0;
-	table->p_top = table->p_bottom = table->p_position = NULL;
 
-	table->nodes = (Node *)calloc(table->size, sizeof(Node));
+	table_init(table);
 
         while(NULL != old_node) {
 		table_insert(table, old_node->key, old_node->val, old_node->type);
@@ -125,6 +130,59 @@ Node table_insert(Table table, void * key, string val, string type)
         }
 	
 	return new_node;
+}
+
+Node table_insert_simple(Table table, void *key, string val, ...)
+{
+
+}
+
+string table_lookup(Table table, string key, string type)
+{
+	if(NULL == table) {
+		printf("table为NULL\n");
+
+		exit(-1);
+	}
+
+	if(0 == strlen(key)) {
+		printf("key未空\n");
+	
+		exit(-1);
+	}
+
+	string allow_type[2] = {"TYPE_RELATE", "TYPE_INDEX"};
+        if(FALSE == in_basic_string_array(allow_type, type, 2)) {
+       		printf("不允许的type：%s\n", type);
+      
+        	exit(-1);
+        }
+
+	int index = 0;
+      
+        if("TYPE_RELATE" == type) {
+        	index = atoi(key);
+        }
+      
+        if("TYPE_INDEX" == type) {
+                index = time33(key, 1);
+                index = table->mask & index;
+       	}
+
+	Node tmp_node = table->nodes[index];
+	if(NULL == tmp_node) {
+		return "";
+	} else {
+		while(NULL != tmp_node) {
+			if(key == tmp_node->key) {
+				return tmp_node->val;
+			}			
+
+			tmp_node = tmp_node->p_sub_next;
+		}
+
+		if(NULL == tmp_node) return "";
+	}
 }
 
 void table_traverse(Table table)
