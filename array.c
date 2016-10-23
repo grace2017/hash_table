@@ -12,7 +12,10 @@ Table table_create()
 
 	table->size = TABLE_DEFAULT_SIZE;
 	table->mask = table->size - 1;
-	table->all_elem_num = table->valid_elem_num = table->next_index = 0;
+
+	table->all_elem_num = table->valid_elem_num = 0;
+	table->next_index = 1;
+
 	table->p_top = table->p_bottom = table->p_position = NULL;
 	
 	table->nodes = (Node *)calloc(table->size, sizeof(Node));
@@ -20,12 +23,12 @@ Table table_create()
 	return table;
 }
 
-char * resize_table_if_needed(Table table)
+BOOL resize_table_if_needed(Table table)
 {
 	if(0 == (table->size - table->valid_elem_num)) {
-		return "true";
+		return TRUE;
 	} else {
-		return "false";
+		return FALSE;
 	}
 }
 
@@ -55,7 +58,7 @@ void resize_table(Table table)
         }
 }
 
-Node table_insert(Table table, string key, string val, string type)
+Node table_insert(Table table, void * key, string val, string type)
 {
 	string allow_type[2] = {"TYPE_RELATE", "TYPE_INDEX"};
 	if(FALSE == in_basic_string_array(allow_type, type, 2)) {
@@ -64,7 +67,7 @@ Node table_insert(Table table, string key, string val, string type)
 		exit(-1);
 	}
 
-	if("true" == resize_table_if_needed(table)) {
+	if(TRUE == resize_table_if_needed(table)) {
 		resize_table(table);
 	}
 
@@ -73,6 +76,8 @@ Node table_insert(Table table, string key, string val, string type)
 	if("TYPE_RELATE" == type) {
 		if(0 == strlen(key)) {
 			index = table->next_index;
+			
+			key = int_to_string(index);
 		} else {
 			index = atoi(key);
 		}
@@ -94,10 +99,9 @@ Node table_insert(Table table, string key, string val, string type)
 		} else {
 			table->nodes[index] = new_node;
 
-			new_node->p_next = table->p_top;
 			new_node->p_sub_next = NULL;			
 
-			table->p_top = table->p_bottom = new_node;
+			table->p_bottom->p_next = table->p_bottom = table->p_position = new_node;
 		}
 
 		table->all_elem_num++;
@@ -115,6 +119,10 @@ Node table_insert(Table table, string key, string val, string type)
 
 		table->all_elem_num++;
 	}
+
+	if("TYPE_RELATE" == type) {
+       		table->next_index = index + 1;
+        }
 	
 	return new_node;
 }
@@ -137,12 +145,17 @@ void table_traverse(Table table)
 	}
 }
 
+void table_resize_next_index(Table table)
+{
+	table->next_index = 1;
+}
+
 int table_count(Table table)
 {
 	return table->all_elem_num;
 }
 
-Node node_create(string key, string val, string type)
+Node node_create(void * key, string val, string type)
 {
 	Node node = (Node)malloc(sizeof(NODE));
 
@@ -172,4 +185,38 @@ BOOL in_basic_string_array(string *array, string val, unint elem_num)
 	} else {
 		return FALSE;
 	}
+}
+
+int get_int_length(unint val)
+{
+	if(val>0 && val<10) {
+		return 1;
+	} else if(val>10 && val<100) {
+		return 2;
+	} else if(val>100 && val<1000) {
+		return 3;
+	} else if(val>1000 && val<10000) {
+		return 4;
+	} else if(val>10000 && val<100000) {
+		return 5;
+	} else if(val>100000 && val<1000000) {
+		return 6;
+	} else if(val>1000000 && val<10000000) {
+		return 7;
+	} else if(val>10000000 && val<100000000) {
+		return 8;
+	} else {
+		return 16;
+	}
+}
+
+string int_to_string(int src_val)
+{
+	int int_length = get_int_length(src_val);
+
+	string dest_str = (string)malloc(int_length);
+
+	sprintf(dest_str, "%d", src_val);
+
+	return dest_str;
 }

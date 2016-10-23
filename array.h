@@ -9,7 +9,7 @@ typedef unsigned char unchar;
 
 typedef struct node
 {
-	string key;
+	void * key;
 	string val;
 	string type;
 	struct node *p_next;
@@ -40,7 +40,7 @@ typedef P_TABLE Table;
 Table table_create();
 
 //插入元素
-Node table_insert(Table, string, string, string);
+Node table_insert(Table, void *, string, string);
 
 //根据key查找元素
 Node table_lookup(Table, string);
@@ -54,16 +54,19 @@ Node table_lookup(Table, string);
 void table_traverse(Table);
 
 //检测是否需要扩容
-char * resize_table_if_needed(Table);
+BOOL resize_table_if_needed(Table);
 
 //获取node个数
 int table_count(Table);
+
+//重置
+void table_resize_next_index(Table);
 
 //扩容
 void resize_table(Table);
 
 //创建node
-Node node_create(string, string, string);
+Node node_create(void *, string, string);
 
 //下一个node
 Node node_next(Node);
@@ -78,3 +81,9 @@ void * node_val(Node);
 char * node_is_null(Node);
 
 BOOL in_basic_string_array(string *, string, unint);
+
+//获取整数的长度
+int get_int_length(unint);
+
+//整型转为字符串
+string int_to_string(int);
