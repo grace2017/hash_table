@@ -2,12 +2,6 @@
 	如果形参为任意类型的数据，用可变参数实现
 */
 
-#define BOOL int
-#define TRUE 1
-#define FALSE 0
-
-typedef char * string;
-
 typedef unsigned int unint;
 typedef unsigned char unchar;
 
@@ -54,7 +48,7 @@ void table_init(Table);
 
 //插入元素
 Node table_insert(Table, void *, string, string);
-Node table_insert_simple(Table, void *, string, ...);
+Node table_insert_simple(Table, void *, string);
 
 //根据key查找元素
 string table_lookup(Table, string, string);

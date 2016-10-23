@@ -3,6 +3,8 @@
 #include <string.h>
 #include <stdarg.h>
 #include "hash.c"
+#include "type.h"
+#include "string.c"
 #include "array.h"
 
 #define TABLE_DEFAULT_SIZE 8;
@@ -132,9 +134,11 @@ Node table_insert(Table table, void * key, string val, string type)
 	return new_node;
 }
 
-Node table_insert_simple(Table table, void *key, string val, ...)
+Node table_insert_simple(Table table, void *key, string val)
 {
-
+	if(is_int(key)) {
+		
+	}
 }
 
 string table_lookup(Table table, string key, string type)
